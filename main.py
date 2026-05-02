@@ -14,9 +14,8 @@ notion = Client(auth=os.getenv("NOTION_API_KEY"))
 DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
 
 # ==========================================
-# 1. YOUR BUSINESS LOGIC (THE TOOLS)
+# 1. BUSINESS LOGIC (THE TOOLS)
 # ==========================================
-# Notice: We added type hints (-> dict, : str) so Gemini automatically knows how to use them!
 
 def get_website_packages() -> dict:
     """Returns the current standard pricing and packages for Nirranjan Media."""
@@ -33,7 +32,7 @@ def get_website_packages() -> dict:
 
 def submit_qualified_lead(client_name: str, project_details: str, package_or_scope: str, timeframe: str, contact_info: str) -> str:
     """Submits the finalized lead details to the Notion CRM for booking or custom quoting."""
-    print("\n[Nirrace is contacting Notion...]")
+    print("\n[Nirrace is submitting lead...]")
     
     # Generate unique 6-character ID (e.g., NRJ-A1B2)
     suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
@@ -50,14 +49,14 @@ def submit_qualified_lead(client_name: str, project_details: str, package_or_sco
                 "Package": {"rich_text": [{"text": {"content": package_or_scope}}]},
                 "Timeframe": {"rich_text": [{"text": {"content": timeframe}}]},
                 "Contact": {"rich_text": [{"text": {"content": contact_info}}]},
-                "Status": {"rich_text": [{"text": {"content": "LEAD"}}]}
+                "Status": {"select": {"name": "Lead"}}
             }
         )
-        print(f"\n✅ [SYSTEM ALERT: Lead pushed to Notion CRM! Booking ID: {booking_id}]")
+        print(f"\n✅ [Lead submitted successfully to Nirranjan! Booking ID: {booking_id}]")
         return f"Lead submitted successfully to Nirranjan. The internal reference ID is {booking_id}."
     
     except Exception as e:
-        print(f"\n❌ [ERROR writing to Notion: {e}]")
+        print(f"\n❌ [ERROR in generating lead: {e}]")
         return "System error logging the lead. Please tell the client you will notify Nirranjan manually."
 
 # ==========================================
@@ -88,9 +87,9 @@ Guardrails:
 
 # Configure the Gemini Model
 model = genai.GenerativeModel(
-    model_name="gemini-3-flash-preview", # You can use 1.5-flash or 2.0-flash depending on your API access
+    model_name="gemini-3-flash-preview",
     system_instruction=SYSTEM_PROMPT,
-    tools=[get_website_packages, submit_qualified_lead] # Just pass the Python functions directly!
+    tools=[get_website_packages, submit_qualified_lead]
 )
 
 # ==========================================
